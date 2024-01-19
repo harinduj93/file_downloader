@@ -39,17 +39,17 @@ def get_file_size(url):
         return 0
 
 def download_files_from_xml(xml_file):
-    total_size = calculate_total_size(xml_file)
+    #total_size = calculate_total_size(xml_file)
 
     # Display total file size
-    print(f'Total file size: {total_size / (1024 * 1024):.2f} MB')
+    #print(f'Total file size: {total_size / (1024 * 1024):.2f} MB')
 
     # Ask for confirmation to download
-    confirmation = input('Do you want to download these files? (yes/no): ')
+    #confirmation = input('Do you want to download these files? (yes/no): ')
 
-    if confirmation.lower() != 'yes':
-        print('Download aborted.')
-        return
+    #if confirmation.lower() != 'yes':
+    #    print('Download aborted.')
+    #    return
 
     # Parse the XML file and start downloading
     tree = ET.parse(xml_file)
