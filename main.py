@@ -1,5 +1,6 @@
 import requests
 from xml.etree import ElementTree as ET
+from tqdm import tqdm
 
 
 
@@ -58,25 +59,37 @@ def download_files_from_xml(xml_file):
     # Define the namespace
     ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
 
-    for url_element in root.findall('.//ns:loc', namespaces=ns):
+    for url_element in tqdm(root.findall('.//ns:loc', namespaces=ns), desc='Downloading', unit='file'):
         file_url = url_element.text
         download_file(file_url)
 
 def download_file(url):
-    # Extract the file name from the URL
     file_name = url.split('/')[-1]
 
     # Make a request to download the file
-    response = requests.get(url)
+    with requests.get(url, stream=True) as response:
+        # Check if the request was successful (status code 200)
+        if response.status_code == 200:
+            # Get the total file size from the Content-Length header
+            total_size = int(response.headers.get('content-length', 0))
 
-    # Check if the request was successful (status code 200)
-    if response.status_code == 200:
-        # Save the file
-        with open(file_name, 'wb') as file:
-            file.write(response.content)
-        print(f'Successfully downloaded: {file_name}')
-    else:
-        print(f'Failed to download: {url}, Status code: {response.status_code}')
+            # Initialize the tqdm progress bar with color
+            progress_bar = tqdm(total=total_size, desc=f'Downloading {file_name}', unit='B', unit_scale=True, unit_divisor=1024)
+
+            # Iterate over the content with a buffer size
+            for data in response.iter_content(chunk_size=1024):
+                # Write the data to the file
+                with open(file_name, 'ab') as file:
+                    file.write(data)
+                
+                # Update the progress bar
+                progress_bar.update(len(data))
+
+            # Close the progress bar
+            progress_bar.close()
+
+            
+
 
 # Example usage
 
